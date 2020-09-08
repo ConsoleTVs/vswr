@@ -3,7 +3,7 @@
 ## Feautres
 
 - :tada: &nbsp; Built for **Vue 3**
-- :fire: &nbsp; **Extremly small** at 1.3KB.
+- :fire: &nbsp; **Extremly small** at 1.4KB.
 - :fire: &nbsp; **No dependencies**.
 - :+1: &nbsp; Built-in **cache** and request deduplication.
 - :eyes: &nbsp; **Dependent fetching** of data that depends on other.
