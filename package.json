@@ -1,0 +1,41 @@
+{
+  "name": "vswr",
+  "version": "0.1.0",
+  "description": "Vue hook to use a stale-while-revalidate strategy to fetch data",
+  "author": "Èrik C. Forés <soc@erik.cat>",
+  "repository": "https://github.com/ConsoleTV/vswr",
+  "license": "MIT",
+  "source": "src/index.ts",
+  "main": "dist/vswr.js",
+  "module": "dist/vswr.module.js",
+  "esmodule": "dist/vswr.modern.js",
+  "unpkg": "dist/vswr.umd.js",
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "dist",
+    "dist/types/index.d.ts"
+  ],
+  "keywords": [
+    "swr",
+    "vue",
+    "vue 3",
+    "hook"
+  ],
+  "scripts": {
+    "serve": "vue-cli-service serve sample/index.ts",
+    "dev": "microbundle --watch --no-compress",
+    "build": "microbundle --compress",
+    "prepare": "yarn build"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0-rc.10"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-typescript": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/compiler-sfc": "^3.0.0-rc.10",
+    "microbundle": "^0.12.3",
+    "typescript": "^4.0.2",
+    "vue": "^3.0.0-rc.10"
+  }
+}
