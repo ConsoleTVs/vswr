@@ -143,7 +143,7 @@ export interface SWRMutateOptions {
    * Determines the revalidation options passed to revalidate in case
    * the parameter `revalidate` is set to true.
    */
-  revalidateOptions: SWRRevalidateOptions
+  revalidateOptions: Partial<SWRRevalidateOptions>
 }
 
 /**
