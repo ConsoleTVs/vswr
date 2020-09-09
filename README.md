@@ -24,8 +24,10 @@
 
 ```vue
 <template>
-  <div v-for="post of posts ?? []" :key="post.id">
-    {{ post.title }}
+  <div v-if="posts">
+    <div v-for="post of posts" :key="post.id">
+      {{ post.title }}
+    </div>
   </div>
 </template>
 
@@ -121,7 +123,10 @@ createApp(App)
 
 ```vue
 <template>
-  <div>{{ post?.title }} by {{ user?.name }}</div>
+  <div>
+    <div v-if="post">{{ post.title }}</div>
+    <div v-if="user">{{ user.name }}</div>
+  </div>
 </template>
 
 <script>
@@ -186,8 +191,10 @@ function revalidate(options): void
 
 ```vue
 <template>
-  <div>{{ post?.title }}</div>
-  <button @click="() => revalidate()">Revalidate</button>
+  <div v-if="post">
+    <div>{{ post.title }}</div>
+    <button @click="() => revalidate()">Revalidate</button>
+  </div>
 </template>
 
 <script>
@@ -257,13 +264,15 @@ over-write the static data with the server data again.
 
 ```vue
 <template>
-  <div>{{ post?.title }}</div>
-  <button @click="() => mutate((state) => ({ ...state, title: 'Sample' }), { revalidate: false })">
-    Mutate only title
-  </button>
-  <button @click="() => mutate({ title: 'Sample' }, { revalidate: false })">
-    Leave only title
-  </button>
+  <div v-if="post">
+    <div>{{ post.title }}</div>
+    <button @click="() => mutate((state) => ({ ...state, title: 'Sample' }), { revalidate: false })">
+      Mutate only title
+    </button>
+    <button @click="() => mutate({ title: 'Sample' }, { revalidate: false })">
+      Leave only title
+    </button>
+  </div>
 </template>
 
 <script>
@@ -288,10 +297,12 @@ For example, a failed request.
 
 ```vue
 <template>
-  <div v-if="error">There was an error</div>
-  <div v-else>
-    <div v-for="post of posts ?? []" :key="post.id">
-      {{ post.title }}
+  <div>
+    <div v-if="error">There was an error</div>
+    <div v-else-if="posts">
+      <div v-for="post of posts" :key="post.id">
+        {{ post.title }}
+      </div>
     </div>
   </div>
 </template>
