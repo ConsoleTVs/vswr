@@ -1,5 +1,20 @@
 ![Vue SWR - Vue hook to use a stale-while-revalidate strategy to fetch data](vswr.svg)
 
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Features](#features)
+- [Installation](#installation)
+- [Getting Started](#getting-started)
+- [Configuration options](#configuration-options)
+- [Global configuration options](#global-configuration-options)
+- [Dependent fetching](#dependent-fetching)
+- [Re-validate on demand](#re-validate-on-demand)
+- [Mutate on demand](#mutate-on-demand)
+- [Error handling](#error-handling)
+- [FAQ](#faq)
+- [Contributors](#contributors)
+
 ## Introduction
 
 Quote from [vercel's SWR](https://swr.vercel.app/) for react:
@@ -31,7 +46,19 @@ Quote from [vercel's SWR](https://swr.vercel.app/) for react:
 - :zzz: &nbsp; **Offline support** to be used without any revalidations with string keys.
 - :+1: &nbsp; **Global configuration** available or per hook call.
 
-## Example
+## Installation
+
+You can use npm or yarn to install it.
+
+```
+npm i vswr
+```
+
+```
+yarn add vswr
+```
+
+## Getting Started
 
 ```vue
 <template>
@@ -59,6 +86,10 @@ export default {
 </script>
 ```
 
+This is a simple example that will use SWR as the strategy to fetch the data. In this particular case,
+all the default options are used (or the ones specified in the global config) and it will fetch the data
+using the default or global fetcher and update the DOM when the request is done.
+
 ## Configuration options
 
 All hook calls can have their respective configuration options applied to it. Nevertheless you can also
@@ -68,6 +99,8 @@ configure global options to avoid passing them to each hook call.
 
 ```js
 function useSWR(key, options): SWRResponse
+// Can be destructured to get the response as such:
+const { data, error, mutate, revalidate } = useSWR(key, options)
 ```
 
 #### Parameters
@@ -93,10 +126,10 @@ function useSWR(key, options): SWRResponse
 - `mutate: (value, options) => void`: Mutate alias for the global mutate function without the need to append the key to it.
 - `revalidate: (options) => void`: Revalidation alias for the global revalidate function without the need to append the key to it.
 
-## Global configuration options (optional but recommended)
+## Global configuration options
 
 You can configure the options globally by creating a SWR instance and using it in your vue
-application as a plugin.
+application as a plugin. This step is not mandatory but it's recommened for most apps.
 
 ### Signature
 
@@ -123,7 +156,7 @@ const swr = createSWR({
   // Configure a global fetcher for all SWR hooks. This
   // can be replaced with anything that returns a promise
   // with the data inside, for example: axios.
-  fetcher: (key) => fetch(key).then((res) => res.json(),
+  fetcher: (key) => fetch(key).then((res) => res.json()),
 })
 
 createApp(App)
@@ -332,14 +365,16 @@ export default {
 </script>
 ```
 
-## Differences with `swr`
+## FAQ
+
+### Differences with `swr`
 
 SWR was my first impressions on this quind of aproach towards data fetching. I've come to realize it
 is a strategy that I enjoy and fits well into modern front-end frameworks like React or Vue. However
 SWR is only compatible with react and I often use Vue for work related tasks. This lead me to consider
 a Vue alternative that I could use to achieve the same results.
 
-## Differences with `swrv`
+### Differences with `swrv`
 
 I built this library when `swrv` was already established. However, at that time, it was mostly
 used with vue 2 and had a small feature set and some important issues that I needed to avoid for
@@ -348,3 +383,7 @@ implement SWR from the ground up without looking at any code from `swr` or `swrv
 are both great and lead a strong foundation to what I was able to achieve. In fact, I used both project
 documentations to decide the initial feature set I wanted to have. Nevertheless, due the lack of a few
 features I needed (like network change revalidation or request deduping) it made me start building this lib.
+
+## Contributors
+
+![No contributors yet](https://i.imgflip.com/2agvl6.jpg)
