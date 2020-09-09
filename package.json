@@ -1,6 +1,6 @@
 {
   "name": "vswr",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Vue hook to use a stale-while-revalidate strategy to fetch data",
   "author": "Èrik C. Forés <soc@erik.cat>",
   "repository": "https://github.com/ConsoleTV/vswr",
