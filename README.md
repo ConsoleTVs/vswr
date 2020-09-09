@@ -1,4 +1,4 @@
-![Vue SWR - Vue hook to use a stale-while-revalidate strategy to fetch data](vswr.svg)
+![Vue SWR - Vue hook to use a stale-while-revalidate strategy to fetch data](https://raw.githubusercontent.com/ConsoleTVs/vswr/master/vswr.svg)
 
 ## Table of Contents
 
