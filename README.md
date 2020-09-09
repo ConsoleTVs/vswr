@@ -63,16 +63,17 @@ function useSWR(key, options): SWRResponse
 
 - `key`: A resolved or non-resolved key. Can either be a string, or a function. A function can be used for dependent fetching as seen below.
 - `options`: An optional object with optional properties such as:
-  - `fetcher: (key) => Promise<any>`: Determines the fetcher function to use. This will be called to get the data.
-  - `initialData: any`: Represents the initial data to use instead of undefined. Keep in mind the component will still attempt to re-validate
+  - `fetcher: (key) => Promise<any> = (url) => fetch(url).then((res) => res.json())`: Determines the fetcher function to use.
+    This will be called to get the data.
+  - `initialData: any = undefined`: Represents the initial data to use instead of undefined. Keep in mind the component will still attempt to re-validate
     unless `revalidateOnMount` is set false.
-  - `revalidateOnMount: boolean`: Determines if the hook should revalidate the component when it is called.
-  - `dedupingInterval: number`: Determines the dedupling interval. This interval represents the time SWR will avoid to perform a request if
+  - `revalidateOnMount: boolean = true`: Determines if the hook should revalidate the component when it is called.
+  - `dedupingInterval: number = 2000`: Determines the dedupling interval. This interval represents the time SWR will avoid to perform a request if
     the last one was made before `dedupingInterval` ago.
-  - `revalidateOnFocus: boolean`: Revalidates the data when the window re-gains focus.
-  - `focusThrottleInterval: number`: Interval throttle for the focus event. This will ignore focus re-validation if it
+  - `revalidateOnFocus: boolean = true`: Revalidates the data when the window re-gains focus.
+  - `focusThrottleInterval: number = 5000`: Interval throttle for the focus event. This will ignore focus re-validation if it
     happened last time `focusThrottleInterval` ago.
-  - `revalidateOnReconnect: boolean`: Revalidates the daata when a network connect change is detected (basically the browser / app comes back online).
+  - `revalidateOnReconnect: boolean = true`: Revalidates the daata when a network connect change is detected (basically the browser / app comes back online).
 
 #### Return Values
 
@@ -168,7 +169,7 @@ function revalidate(key, options): void
 - `key`: Determines the key that is going to be re-validated. This must be a resolved key, meaning it must be a string or undefined.
   If undefined, the function will do nothing.
 - `options`: A partial object (meaning all props can be optional / undefined) that accepts the following options:
-  - `force`:Determines if the re-validation should be forced. When a re-validation is forced, the dedupingInterval
+  - `force: boolean = false`:Determines if the re-validation should be forced. When a re-validation is forced, the dedupingInterval
     will be ignored and a fetch will be performed.
 
 ### On specific hooks with keys
@@ -236,8 +237,8 @@ function mutate(key, value, options): void
   state and returns the new one.
 - `options`: A partial object (meaning all props can be optional / undefined) that accepts the following options:
 
-  - `revalidate: boolean`: Determines if the mutation should attempt to revalidate the data afterwards.
-  - `revalidateOptions: SWRRevalidateOptions`: Determines the revalidation options passed to revalidate in case
+  - `revalidate: boolean = true`: Determines if the mutation should attempt to revalidate the data afterwards.
+  - `revalidateOptions: Partial<SWRRevalidateOptions> = { ...defaultRevalidateOptions }`: Determines the revalidation options passed to revalidate in case
     the parameter `revalidate` is set to true.
 
 ### On specific hooks with keys
