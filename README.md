@@ -1,6 +1,17 @@
 ![Vue SWR - Vue hook to use a stale-while-revalidate strategy to fetch data](vswr.svg)
 
-## Feautres
+## Introduction
+
+Quote from [vercel's SWR](https://swr.vercel.app/) for react:
+
+> The name “SWR” is derived from stale-while-revalidate, a HTTP cache invalidation strategy popularized by
+> [HTTP RFC 5861](https://tools.ietf.org/html/rfc5861). SWR is a strategy to first return the data from cache
+> (stale), then send the fetch request (revalidate), and finally come with the up-to-date data.
+>
+> With SWR, components will get a stream of data updates constantly and automatically.
+> And the UI will be always fast and reactive.
+
+## Features
 
 - :tada: &nbsp; Built for **Vue 3**
 - :fire: &nbsp; **Extremly small** at 1.4KB.
@@ -19,17 +30,6 @@
 - :+1: &nbsp; **Initial data** support for initial or offline data.
 - :zzz: &nbsp; **Offline support** to be used without any revalidations with string keys.
 - :+1: &nbsp; **Global configuration** available or per hook call.
-
-## What's this?
-
-Quote from [vercel's SWR](https://swr.vercel.app/) for react:
-
-> The name “SWR” is derived from stale-while-revalidate, a HTTP cache invalidation strategy popularized by
-> [HTTP RFC 5861](https://tools.ietf.org/html/rfc5861). SWR is a strategy to first return the data from cache
-> (stale), then send the fetch request (revalidate), and finally come with the up-to-date data.
->
-> With SWR, components will get a stream of data updates constantly and automatically.
-> And the UI will be always fast and reactive.
 
 ## Example
 
@@ -79,12 +79,12 @@ function useSWR(key, options): SWRResponse
   - `initialData: any = undefined`: Represents the initial data to use instead of undefined. Keep in mind the component will still attempt to re-validate
     unless `revalidateOnMount` is set false.
   - `revalidateOnMount: boolean = true`: Determines if the hook should revalidate the component when it is called.
-  - `dedupingInterval: number = 2000`: Determines the dedupling interval. This interval represents the time SWR will avoid to perform a request if
+  - `dedupingInterval: number = 2000`: Determines the deduping interval. This interval represents the time SWR will avoid to perform a request if
     the last one was made before `dedupingInterval` ago.
   - `revalidateOnFocus: boolean = true`: Revalidates the data when the window re-gains focus.
   - `focusThrottleInterval: number = 5000`: Interval throttle for the focus event. This will ignore focus re-validation if it
     happened last time `focusThrottleInterval` ago.
-  - `revalidateOnReconnect: boolean = true`: Revalidates the daata when a network connect change is detected (basically the browser / app comes back online).
+  - `revalidateOnReconnect: boolean = true`: Revalidates the data when a network connect change is detected (basically the browser / app comes back online).
 
 #### Return Values
 
@@ -331,3 +331,20 @@ export default {
 }
 </script>
 ```
+
+## Differences with `swr`
+
+SWR was my first impressions on this quind of aproach towards data fetching. I've come to realize it
+is a strategy that I enjoy and fits well into modern front-end frameworks like React or Vue. However
+SWR is only compatible with react and I often use Vue for work related tasks. This lead me to consider
+a Vue alternative that I could use to achieve the same results.
+
+## Differences with `swrv`
+
+I built this library when `swrv` was already established. However, at that time, it was mostly
+used with vue 2 and had a small feature set and some important issues that I needed to avoid for
+a work project I was working on. This lead me into tinkering with Vue's 3 reactivity system to
+implement SWR from the ground up without looking at any code from `swr` or `swrv`. Those two projects
+are both great and lead a strong foundation to what I was able to achieve. In fact, I used both project
+documentations to decide the initial feature set I wanted to have. Nevertheless, due the lack of a few
+features I needed (like network change revalidation or request deduping) it made me start building this lib.
