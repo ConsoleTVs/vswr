@@ -63,6 +63,13 @@ export interface SWROptions<D = any> {
    * is detected (basically the browser / app comes back online).
    */
   revalidateOnReconnect: boolean
+
+  /**
+   * This callback will be called every time there's new data available.
+   * Keep in mind this will fire after the initial population and after every
+   * revalidation's success.
+   */
+  onData?: (data: D) => void
 }
 
 /**
@@ -298,6 +305,7 @@ export const useSWR = <D = any, E = Error>(key: SWRKey, options?: Partial<SWROpt
     revalidateOnFocus,
     focusThrottleInterval,
     revalidateOnReconnect,
+    onData,
   }: SWROptions<D> = {
     // Default options
     ...defaultOptions,
@@ -332,6 +340,7 @@ export const useSWR = <D = any, E = Error>(key: SWRKey, options?: Partial<SWROpt
       if (resolvedKey) {
         const handler = ({ detail }: CustomEvent<D>) => {
           data.value = detail
+          if (onData) onData(data.value)
         }
         cache.subscribe(resolvedKey, handler)
         onInvalidate(() => cache.unsubscribe(resolvedKey, handler))
@@ -404,7 +413,10 @@ export const useSWR = <D = any, E = Error>(key: SWRKey, options?: Partial<SWROpt
         mutateCurrent(initialData, { revalidate: false })
       } else if (resolvedKey && cache.has(resolvedKey)) {
         const item = cache.get<D>(resolvedKey)
-        if (!item.isResolving()) data.value = item.data as D
+        if (!item.isResolving()) {
+          data.value = item.data as D
+          if (onData) onData(data.value)
+        }
       }
       // Revalidate the component to fetch new data if needed.
       if (revalidateOnMount) revalidateCurrentWithOptions()

@@ -118,6 +118,8 @@ const { data, error, mutate, revalidate } = useSWR(key, options)
   - `focusThrottleInterval: number = 5000`: Interval throttle for the focus event. This will ignore focus re-validation if it
     happened last time `focusThrottleInterval` ago.
   - `revalidateOnReconnect: boolean = true`: Revalidates the data when a network connect change is detected (basically the browser / app comes back online).
+  - `onData: (data: D) => void = undefined`: This callback will be called every time there's new data available. Keep in mind this will fire after
+    the initial population and after every revalidation's success.
 
 #### Return Values
 
