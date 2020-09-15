@@ -385,7 +385,7 @@ import { clear } from 'vswr'
 function clear(keys): void
 ```
 
-#### Parameters
+#### Parameters
 
 - `keys`: A list with the keys to delete. If keys is undefined, all keys will be cleared from the cache.
 
