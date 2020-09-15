@@ -83,6 +83,11 @@ export interface SWRCache {
   remove(key: SWRResolvedKey): void
 
   /**
+   * Removes all the key-value pairs from the cache.
+   */
+  clear(): void
+
+  /**
    * Determines if the cache has a given key.
    */
   has(key: SWRResolvedKey): boolean
@@ -155,6 +160,13 @@ export default class DefaultCache implements SWRCache {
    */
   remove(key: SWRResolvedKey): void {
     this.elements.delete(key)
+  }
+
+  /**
+   * Removes all the key-value pairs from the cache.
+   */
+  clear(): void {
+    this.elements.clear()
   }
 
   /**

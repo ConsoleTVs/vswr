@@ -83,6 +83,7 @@ const defaultOptions: SWROptions = {
   revalidateOnFocus: true,
   focusThrottleInterval: 5000,
   revalidateOnReconnect: true,
+  onData: undefined,
 }
 
 /**
@@ -209,6 +210,15 @@ export const createSWR = <D>(options: Partial<SWROptions<D>>): ((app: App) => vo
   return (app) => {
     app.provide(vswr, options)
   }
+}
+
+/**
+ * Clear the specified keys from the cache. If no keys
+ * are specified, it clears all the cache keys.
+ */
+export const clear = (keys?: SWRResolvedKey[]) => {
+  if (keys === undefined) return cache.clear()
+  for (const key of keys) cache.remove(key)
 }
 
 /**

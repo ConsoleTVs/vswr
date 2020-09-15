@@ -12,6 +12,7 @@
 - [Re-validate on demand](#re-validate-on-demand)
 - [Mutate on demand](#mutate-on-demand)
 - [Error handling](#error-handling)
+- [Clear Cache](#clear-cache)
 - [FAQ](#faq)
 - [Contributors](#contributors)
 
@@ -43,6 +44,7 @@ Quote from [vercel's SWR](https://swr.vercel.app/) for react:
 - :zzz: &nbsp; **Window focus revalidation** of the data.
 - :zzz: &nbsp; **Network change revalidation** of the data.
 - :+1: &nbsp; **Initial data** support for initial or offline data.
+- :+1: &nbsp; **Clear cache** when you need to invalidate all data or the specified keys (eg. a user logout).
 - :zzz: &nbsp; **Offline support** to be used without any revalidations with string keys.
 - :+1: &nbsp; **Global configuration** available or per hook call.
 
@@ -366,6 +368,26 @@ export default {
 }
 </script>
 ```
+
+## Clear Cache
+
+You can clear all the cached keys or the specified ones when you need to invalidate some keys.
+
+To do this, you can use the `clear` global function.
+
+```js
+import { clear } from 'vswr'
+```
+
+### Signature
+
+```ts
+function clear(keys): void
+```
+
+#### Parameters
+
+- `keys`: A list with the keys to delete. If keys is undefined, all keys will be cleared from the cache.
 
 ## FAQ
 
