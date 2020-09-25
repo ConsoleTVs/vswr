@@ -1,19 +1,21 @@
 <template>
-  <div>Vue SWR</div>
+  <!-- <div>Vue SWR</div>
   <button @click="show = !show">Toggle Child</button>
   <Child />
   <Child v-if="show" />
   <h1>Some other data:</h1>
-  <div v-if="data">{{ data.name }}</div>
+  <div v-if="data">{{ data.name }}</div> -->
+  <Pagination />
 </template>
 
 <script>
 import { ref } from 'vue'
 import Child from './components/Child'
+import Pagination from './components/Pagination'
 import { useSWR } from '../dist/vswr'
 
 export default {
-  components: { Child },
+  components: { Child, Pagination },
   setup() {
     const show = ref(false)
     const { data, mutate } = useSWR('some.key', {

@@ -30,7 +30,7 @@ Quote from [vercel's SWR](https://swr.vercel.app/) for react:
 ## Features
 
 - :tada: &nbsp; Built for **Vue 3**
-- :fire: &nbsp; **Extremly small** at 1.4KB.
+- :fire: &nbsp; **Extremly small and well packed** at 2KB.
 - :fire: &nbsp; **No dependencies**.
 - :+1: &nbsp; Built-in **cache** and request deduplication.
 - :eyes: &nbsp; **Dependent fetching** of data that depends on other.
@@ -129,6 +129,9 @@ const { data, error, mutate, revalidate } = useSWR(key, options)
 - `error: Ref<E | undefined>`: Determines error of the HTTP response in case it happened or undefined if there was no error or the HTTP request is not completed yet.
 - `mutate: (value, options) => void`: Mutate alias for the global mutate function without the need to append the key to it.
 - `revalidate: (options) => void`: Revalidation alias for the global revalidate function without the need to append the key to it.
+- `clear: () => void`: Clears the current key data from the cache.
+- `stop: () => void`: Stops the execution of the watchers. This means the data will unsubscribe from the cache, and will
+  remove all event listeners that used.
 
 ## Global configuration options
 

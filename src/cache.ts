@@ -1,4 +1,6 @@
-import type {SWRResolvedKey} from './swr'
+import { defaultCacheRemoveOptions, defaultCacheClearOptions } from './options'
+import EventTarget from './EventTarget'
+import { SWRResolvedKey } from './key'
 
 /**
  * Determines how a cache item data looks like.
@@ -63,6 +65,23 @@ export class CacheItem<D = unknown> {
 }
 
 /**
+ * Determines the cache item removal options.
+ */
+export interface CacheRemoveOptions {
+  /**
+   * Determines if the cache should broadcast the cache
+   * change to subscribed handlers. That means telling them
+   * the value now resolves to undefined.
+   */
+  broadcast: boolean
+}
+
+/**
+ * Determines the cache clear options.
+ */
+export interface CacheClearOptions extends CacheRemoveOptions {}
+
+/**
  * Represents the methods a cache should implement
  * in order to be usable by vue-swr.
  */
@@ -80,12 +99,12 @@ export interface SWRCache {
   /**
    * Removes a key-value pair from the cache.
    */
-  remove(key: SWRResolvedKey): void
+  remove(key: SWRResolvedKey, options?: Partial<CacheRemoveOptions>): void
 
   /**
    * Removes all the key-value pairs from the cache.
    */
-  clear(): void
+  clear(options?: Partial<CacheClearOptions>): void
 
   /**
    * Determines if the cache has a given key.
@@ -101,12 +120,17 @@ export interface SWRCache {
    * Unsubscribes to the given key events.
    */
   unsubscribe<D>(key: SWRResolvedKey, callback: (event: CustomEvent<D>) => void): void
+
+  /**
+   * Broadcasts a value change to all subscribed instances.
+   */
+  broadcast<D>(key: SWRResolvedKey, detail: D): void
 }
 
 /**
  * Default cache implementation for vue-cache.
  */
-export default class DefaultCache implements SWRCache {
+export class DefaultCache implements SWRCache {
   /**
    * Stores the elements of the cache in a key-value pair.
    */
@@ -118,21 +142,21 @@ export default class DefaultCache implements SWRCache {
   private event: EventTarget = new EventTarget()
 
   /**
-   *
-   * @param value
+   * Resolves the promise and replaces the Promise to the resolved data.
+   * It also broadcasts the value change if needed or deletes the key if
+   * the value resolves to undefined or null.
    */
   private resolve<D>(key: SWRResolvedKey, value: CacheItem<D>) {
     Promise.resolve(value.data).then((detail) => {
       if (detail === undefined || detail === null) {
         // The value resolved to undefined, and we delete
         // it from the cache and don't broadcast any event.
-        this.remove(key)
-        return
+        return this.remove(key)
       }
       // Update the value with the resolved one.
       value.data = detail
       // Broadcast the update to all other cache subscriptions.
-      this.event.dispatchEvent(new CustomEvent(key, { detail }))
+      this.broadcast(key, detail)
     })
   }
 
@@ -158,14 +182,18 @@ export default class DefaultCache implements SWRCache {
   /**
    * Removes an key-value pair from the cache.
    */
-  remove(key: SWRResolvedKey): void {
+  remove(key: SWRResolvedKey, options?: Partial<CacheRemoveOptions>): void {
+    const { broadcast }: CacheRemoveOptions = { ...defaultCacheRemoveOptions, ...options }
+    if (broadcast) this.broadcast(key, undefined)
     this.elements.delete(key)
   }
 
   /**
    * Removes all the key-value pairs from the cache.
    */
-  clear(): void {
+  clear(options?: Partial<CacheClearOptions>): void {
+    const { broadcast }: CacheClearOptions = { ...defaultCacheClearOptions, ...options }
+    if (broadcast) for (const key of this.elements.keys()) this.broadcast(key, undefined)
     this.elements.clear()
   }
 
@@ -190,4 +218,16 @@ export default class DefaultCache implements SWRCache {
   unsubscribe<D>(key: SWRResolvedKey, callback: (event: CustomEvent<D>) => void): void {
     this.event.removeEventListener(key, callback as EventListener)
   }
+
+  /**
+   * Broadcasts a value change  on all subscribed instances.
+   */
+  broadcast<D>(key: SWRResolvedKey, detail: D) {
+    this.event.dispatchEvent(new CustomEvent(key, { detail }))
+  }
 }
+
+/**
+ * Cache used for the storage of the responses.
+ */
+export default new DefaultCache()
