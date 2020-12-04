@@ -3,7 +3,7 @@
   "version": "0.4.0",
   "description": "Vue hook to use a stale-while-revalidate strategy to fetch data",
   "author": "Èrik C. Forés <soc@erik.cat>",
-  "repository": "https://github.com/ConsoleTV/vswr",
+  "repository": "https://github.com/ConsoleTVs/vswr",
   "license": "MIT",
   "source": "src/index.ts",
   "main": "dist/vswr.js",
