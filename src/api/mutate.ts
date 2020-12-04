@@ -2,6 +2,7 @@ import { revalidate, SWRRevalidateOptions } from './revalidate'
 import { defaultMutateOptions } from '../options'
 import cache, { CacheItem } from '../cache'
 import { SWRResolvedKey } from '../key'
+import { vswr } from './createSWR'
 
 /**
  * Mutation options.
@@ -44,7 +45,11 @@ export const mutate = <D>(
 
   // Get the configuration option of the mutate.
   const { revalidate: revalidateAfterMutation, revalidateOptions }: SWRMutateOptions = {
+    // Default options
     ...defaultMutateOptions,
+    // Provided global options (from the app).
+    ...inject(vswr, {}),
+    // Current instance options.
     ...options,
   }
 
