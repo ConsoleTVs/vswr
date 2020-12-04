@@ -5,6 +5,7 @@ import { SWRResolvedKey } from '../key'
 import { SWROptions } from './useSWR'
 import { mutate } from './mutate'
 import { vswr } from './createSWR'
+import { inject } from 'vue'
 
 /**
  * Determines how the revalidation options look like.
