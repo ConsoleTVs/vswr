@@ -4,6 +4,7 @@ import { requestData } from '../helpers'
 import { SWRResolvedKey } from '../key'
 import { SWROptions } from './useSWR'
 import { mutate } from './mutate'
+import { vswr } from './createSWR'
 
 /**
  * Determines how the revalidation options look like.
@@ -25,7 +26,14 @@ export const revalidate = <D>(key?: SWRResolvedKey, options?: Partial<SWRRevalid
   if (!key) return
 
   // Resolves the options given the defaults.
-  const { force, fetcher, dedupingInterval }: SWRRevalidateOptions<D> = { ...defaultRevalidateOptions, ...options }
+  const { force, fetcher, dedupingInterval }: SWRRevalidateOptions<D> = {
+    // Default options
+    ...defaultRevalidateOptions,
+    // Provided global options (from the app).
+    ...inject(vswr, {}),
+    // Current instance options.
+    ...options,
+  }
 
   // Stores the data to mutate (if any).
   let data: undefined | Promise<D | undefined> = undefined
