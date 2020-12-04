@@ -3,6 +3,7 @@ import { defaultMutateOptions } from '../options'
 import cache, { CacheItem } from '../cache'
 import { SWRResolvedKey } from '../key'
 import { vswr } from './createSWR'
+import { inject } from 'vue'
 
 /**
  * Mutation options.
