@@ -12,6 +12,7 @@
 - [Re-validate on demand](#re-validate-on-demand)
 - [Mutate on demand](#mutate-on-demand)
 - [Manual subscription](#manual-subscription)
+- [Get values from the cache](#get-values-from-the-cache)
 - [Error handling](#error-handling)
 - [Clear Cache](#clear-cache)
 - [FAQ](#faq)
@@ -361,7 +362,7 @@ subscribeErrors(key, (error) => {
 })
 ```
 
-## Get values from the cache.
+## Get values from the cache
 
 You can also manually get values from the cache without the need to subscribe for changes or
 use the built-in hook (that does more things under the hood like subscribing as well). You can use
