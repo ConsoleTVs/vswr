@@ -4,6 +4,7 @@
 
 - [Introduction](#introduction)
 - [Features](#features)
+- [Upgrade guide](#upgrade-guide)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
 - [Configuration options](#configuration-options)
@@ -48,6 +49,17 @@ Quote from [vercel's SWR](https://swr.vercel.app/) for react:
 - :+1: &nbsp; **Clear cache** when you need to invalidate all data or the specified keys (eg. a user logout).
 - :zzz: &nbsp; **Offline support** to be used without any revalidations with string keys.
 - :+1: &nbsp; **Global configuration** available or per hook call.
+
+## Upgrade Guide
+
+If you come from `0.X.X` please read this section.
+
+- **Update the way you create global configuration.**. There's no need to use `createSWR` and pass the result
+  to the vue app as a plugin, you can now use `createDefaultSWR` function instead and avoid registering the vue plugin.
+- `revalidateOnMount` option has been renamed to `revalidateOnStart`.
+- The `clear` function does now accept a single string, and an additional options parameter.
+- The default fetcher now throws an error when the server response is not `2XX`. Meaning that there will be
+  an error propagation and populate the error variables when the server response is not `2XX`.
 
 ## Installation
 
