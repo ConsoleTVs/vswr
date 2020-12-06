@@ -1,0 +1,28 @@
+{
+  "name": "vswr",
+  "version": "1.0.0",
+  "description": "Stale-While-Revalidate (SWR) strategy to fetch data in Vue 3",
+  "author": "Èrik C. Forés <soc@erik.cat>",
+  "repository": "https://github.com/ConsoleTVs/vswr",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/esm/index.js",
+  "unpkg": "dist/iife/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsup src/index.ts --watch --format esm,cjs,iife --legacy-output",
+    "build": "tsup src/index.ts --dts --format esm,cjs,iife --legacy-output --minify",
+    "prepack": "npm run build"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.4"
+  },
+  "devDependencies": {
+    "swrev": "^1.7.0",
+    "tsup": "^3.10.1",
+    "typescript": "^4.1.2"
+  }
+}
