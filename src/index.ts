@@ -67,9 +67,9 @@ export class VSWR extends SWR {
     const isValid = computed(() => data.value !== undefined && error.value === undefined)
 
     // Loading function for the current key.
-    // It's a promise that resolves to the data
-    // if the request is successful, and rejects
-    // the promise if an error is thrown.
+    // It's a function that returns a promise that
+    // resolves to the data if the request is successful,
+    // and rejects the promise if an error is thrown.
     // Keep in mind only the first case of those two
     // cases will be registered, no further changes
     // will be watched.

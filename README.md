@@ -145,7 +145,7 @@ const { data, error, mutate, revalidate, clear, stop, isLoading, isValid, loadin
 - `stop: () => void`: Stops the execution of the watcher. This means the data will unsubscribe from the cache and error changes as well as all the event listeners.
 - `isLoading: ComputedRef<boolean>`: Determines if the request is still on its way and therefore, it's still loading.
 - `isValid: ComputedRef<boolean>`: Determines if the data is valid. This means that there is no error associated with the data. This exists because errors do not wipe the data value and can still be used.
-- `loading: () => Promise<D>`: It's a promise that resolves to the data if the request is successful, and rejects the promise if an error is thrown. Keep in mind only the first case of those two cases will be registered, no further changes will be watched.
+- `loading: () => Promise<D>`: It's a function that returns a promise that resolves to the data if the request is successful, and rejects the promise if an error is thrown. Keep in mind only the first case of those two cases will be registered, no further changes will be watched.
 
 ## Global configuration options
 
