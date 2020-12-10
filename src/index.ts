@@ -1,5 +1,5 @@
 import { SWR, SWRKey, SWROptions, SWRMutateOptions, SWRRevalidateOptions, CacheClearOptions } from 'swrev'
-import { ref, getCurrentInstance, onUnmounted, watch, computed } from 'vue'
+import { Ref, ref, getCurrentInstance, onUnmounted, watch, watchEffect, computed } from 'vue'
 
 export class VSWR extends SWR {
   /**
@@ -66,8 +66,26 @@ export class VSWR extends SWR {
     // and can still be used.
     const isValid = computed(() => data.value !== undefined && error.value === undefined)
 
+    // Loading function for the current key.
+    // It's a promise that resolves to the data
+    // if the request is successful, and rejects
+    // the promise if an error is thrown.
+    // Keep in mind only the first case of those two
+    // cases will be registered, no further changes
+    // will be watched.
+    const loading = () => {
+      return new Promise<Ref<D>>((resolve, reject) => {
+        const stopLoading = watchEffect(() => {
+          if (isLoading) return
+          else if (error.value !== undefined) reject(error)
+          else resolve(data as Ref<D>)
+          stopLoading()
+        })
+      })
+    }
+
     // Return the data.
-    return { data, error, mutate, revalidate, clear, stop, isLoading, isValid }
+    return { data, error, mutate, revalidate, clear, stop, isLoading, isValid, loading }
   }
 }
 
