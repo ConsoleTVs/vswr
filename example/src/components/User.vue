@@ -21,9 +21,14 @@ import { useSWR } from 'vswr'
 export default {
   setup() {
     const userId = ref(1)
-    const { data: user, error, mutate, revalidate, clear, isLoading, isValid } = useSWR(
+    const { data: user, error, mutate, revalidate, clear, isLoading, isValid, loading } = useSWR(
       () => `https://jsonplaceholder.typicode.com/users/${userId.value}`
     )
+
+    loading()
+      .then((u) => console.log('First user fetched resolved to:', u.value))
+      .catch((e) => console.log('First user fetched failed with error', e.value))
+
     return { user, error, mutate, revalidate, clear, userId, isLoading, isValid }
   },
 }

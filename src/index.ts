@@ -76,7 +76,7 @@ export class VSWR extends SWR {
     const loading = () => {
       return new Promise<Ref<D>>((resolve, reject) => {
         const stopLoading = watchEffect(() => {
-          if (isLoading) return
+          if (isLoading.value) return
           else if (error.value !== undefined) reject(error)
           else resolve(data as Ref<D>)
           stopLoading()
