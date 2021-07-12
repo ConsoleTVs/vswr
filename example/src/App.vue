@@ -1,5 +1,4 @@
 <template>
-  <div>Hello</div>
   <User />
   <User />
   <User />
@@ -12,7 +11,7 @@ export default {
   name: 'App',
   components: { User },
   setup() {
-    console.log('Hello World')
+    //
   },
 }
 </script>

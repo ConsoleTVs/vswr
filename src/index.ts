@@ -25,10 +25,10 @@ export class VSWR extends SWR {
       () => this.resolveKey(key),
       (_values, _oldValues, onInvalidate) => {
         // Subscribe to the new key.
-        const unsubscribe = this.use<D, E>(key, onData, onError, {
+        const { unsubscribe } = this.use<D, E>(key, onData, onError, {
           loadInitialCache: true,
           ...options,
-        }).unsubscribe
+        })
         // Side effect invalidation to clear the subscription.
         onInvalidate(() => unsubscribe())
       },
@@ -38,21 +38,20 @@ export class VSWR extends SWR {
     // Check if there's an active component
     // to automatically clean up when the component
     // goes out of scope.
-    const currentInstance = getCurrentInstance()
-    if (currentInstance) onUnmounted(() => stop())
+    if (getCurrentInstance()) onUnmounted(() => stop())
 
     // Mutates the current key.
-    const mutate = (value: D, options: Partial<SWRMutateOptions<D>>) => {
+    const mutate = (value: D, options?: Partial<SWRMutateOptions<D>>) => {
       return this.mutate(this.resolveKey(key), value, options)
     }
 
     // Revalidates the current key.
-    const revalidate = (options: Partial<SWRRevalidateOptions<D>>) => {
+    const revalidate = (options?: Partial<SWRRevalidateOptions<D>>) => {
       return this.revalidate(this.resolveKey(key), options)
     }
 
     // Clears the current key from cache.
-    const clear = (options: Partial<CacheClearOptions>) => {
+    const clear = (options?: Partial<CacheClearOptions>) => {
       return this.clear(this.resolveKey(key), options)
     }
 

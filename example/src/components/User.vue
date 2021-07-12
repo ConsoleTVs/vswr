@@ -2,7 +2,7 @@
   <div style="margin: 30px 0px">
     <input v-model="userId" placeholder="User ID" type="number" />
     <div>User ID {{ userId }}</div>
-    <div v-if="!isLoading">
+    <div>
       <div v-if="isValid">User: {{ user }}</div>
       <div>Error: {{ error }}</div>
       <div>
@@ -16,18 +16,29 @@
 
 <script>
 import { ref } from 'vue'
-import { useSWR } from 'vswr'
+import { useSWR, subscribe } from 'vswr'
 
 export default {
   setup() {
     const userId = ref(1)
-    const { data: user, error, mutate, revalidate, clear, isLoading, isValid, loading } = useSWR(
-      () => `https://jsonplaceholder.typicode.com/users/${userId.value}`
-    )
+    const {
+      data: user,
+      error,
+      mutate,
+      revalidate,
+      clear,
+      isLoading,
+      isValid,
+      loading,
+    } = useSWR(() => `https://jsonplaceholder.typicode.com/users/${userId.value}`)
 
     loading()
       .then((u) => console.log('First user fetched resolved to:', u.value))
       .catch((e) => console.log('First user fetched failed with error', e.value))
+
+    subscribe('https://jsonplaceholder.typicode.com/users/1', (v) => {
+      console.log('CHANGE: ', v)
+    })
 
     return { user, error, mutate, revalidate, clear, userId, isLoading, isValid }
   },
