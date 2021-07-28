@@ -1,5 +1,5 @@
 import { SWR, SWRKey, SWROptions, SWRMutateOptions, SWRRevalidateOptions, CacheClearOptions } from 'swrev'
-import { Ref, ref, getCurrentInstance, onUnmounted, watch, watchEffect, computed } from 'vue'
+import { Ref, ref, getCurrentInstance, onUnmounted, watch, watchEffect, computed } from 'vue-demi'
 
 export class VSWR extends SWR {
   /**
