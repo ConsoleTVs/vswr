@@ -41,18 +41,21 @@ export class VSWR extends SWR {
     if (getCurrentInstance()) onUnmounted(() => stop())
 
     // Mutates the current key.
-    const mutate = (value: D, options?: Partial<SWRMutateOptions<D>>) => {
-      return this.mutate(this.resolveKey(key), value, options)
+    const mutate = (value: D, ops?: Partial<SWRMutateOptions<D>>) => {
+      return this.mutate(this.resolveKey(key), value, {
+        revalidateOptions: options,
+        ...ops,
+      })
     }
 
     // Revalidates the current key.
-    const revalidate = (options?: Partial<SWRRevalidateOptions<D>>) => {
-      return this.revalidate(this.resolveKey(key), options)
+    const revalidate = (ops?: Partial<SWRRevalidateOptions<D>>) => {
+      return this.revalidate(this.resolveKey(key), { ...options, ...ops })
     }
 
     // Clears the current key from cache.
-    const clear = (options?: Partial<CacheClearOptions>) => {
-      return this.clear(this.resolveKey(key), options)
+    const clear = (ops?: Partial<CacheClearOptions>) => {
+      return this.clear(this.resolveKey(key), ops)
     }
 
     // Determines if the request is still on its way
