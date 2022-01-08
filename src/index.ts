@@ -5,7 +5,7 @@ export class VSWR extends SWR {
   /**
    * Use the SWR with a vue application.
    */
-  useSWR<D = any, E = Error>(key: SWRKey | undefined | (() => SWRKey | undefined), options?: Partial<SWROptions<D>>) {
+  useSWR<D = any, E = Error>(key?: SWRKey | (() => SWRKey | undefined), options?: Partial<SWROptions<D>>) {
     // Contains the data and errors references.
     const data = ref<D | undefined>()
     const error = ref<E | undefined>()
@@ -167,7 +167,7 @@ export const use = <D = any, E = Error>(
 /**
  * Use the SWR with a vue application.
  */
-export const useSWR = <D = any, E = Error>(key: SWRKey | (() => SWRKey), options?: Partial<SWROptions<D>>) => {
+export const useSWR = <D = any, E = Error>(key?: SWRKey | (() => SWRKey), options?: Partial<SWROptions<D>>) => {
   return swr.useSWR<D, E>(key, options)
 }
 
@@ -176,14 +176,14 @@ export const useSWR = <D = any, E = Error>(key: SWRKey | (() => SWRKey), options
  * This is used to replace the cache contents of the
  * given key manually.
  */
-export const mutate = <D = any>(key: SWRKey, value: D, options?: Partial<SWRMutateOptions<D>>) => {
+export const mutate = <D = any>(key?: SWRKey, value?: D, options?: Partial<SWRMutateOptions<D>>) => {
   return swr.mutate<D>(key, value, options)
 }
 
 /**
  * Revalidates the key and mutates the cache if needed.
  */
-export const revalidate = <D>(key: SWRKey, options?: Partial<SWRRevalidateOptions<D>>) => {
+export const revalidate = <D>(key?: SWRKey, options?: Partial<SWRRevalidateOptions<D>>) => {
   return swr.revalidate(key, options)
 }
 
