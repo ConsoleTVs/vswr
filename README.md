@@ -238,7 +238,7 @@ const { data: user } = query(() => `https://jsonplaceholder.typicode.com/users/$
 
 ```vue
 <script setup>
-import { querySuspense } from './vswr'
+import { querySuspense } from 'vswr'
 
 const { data: post } = await querySuspense(() => 'https://jsonplaceholder.typicode.com/posts/1')
 // We need to pass a function as the key. Function will re-evaluate when data changes and capture errors if needed.
@@ -424,7 +424,7 @@ For components that can fetch multiple resources independently, we can use the P
 
 ```vue
 <script setup>
-import { querySuspense } from './vswr'
+import { querySuspense } from 'vswr'
 
 // Notice we don't use await here, and the result of those `querySuspense`
 // are plain promises.
