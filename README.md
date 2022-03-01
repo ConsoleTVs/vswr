@@ -13,6 +13,7 @@
 - [Dependent fetching](#dependent-fetching)
 - [Re-validate on demand](#re-validate-on-demand)
 - [Mutate on demand](#mutate-on-demand)
+- [Parallel suspense](#parallel-suspense)
 - [Manual subscription](#manual-subscription)
 - [Get values from the cache](#get-values-from-the-cache)
 - [Error handling](#error-handling)
@@ -412,6 +413,32 @@ const { data: post, mutate } = querySuspense('https://jsonplaceholder.typicode.c
     Mutate only title
   </button>
   <button @click="() => mutate({ title: 'Sample' }, { revalidate: false })">Leave only title</button>
+</template>
+```
+
+## Parallel suspense
+
+For components that can fetch multiple resources independently, we can use the Promise's API (eg. Promise.all) to await multiple queries without blocking.
+
+### Example
+
+```vue
+<script setup>
+import { querySuspense } from './vswr'
+
+// Notice we don't use await here, and the result of those `querySuspense`
+// are plain promises.
+const first = querySuspense('/some/query') // Imagine this takes 2 seconds
+const second = querySuspense('/some/other/query') // Imagine this takes 2 seconds
+
+// This await will block until both resolve, but both already
+// started fetching so the blockage is 2 seconds instead of
+// 4 seconds if we awaited each one individually.
+const [{ data: firstData }, { data: secondData }] = await Promise.all([first, second])
+</script>
+
+<template>
+  <!-- Do something with firstData and secondData -->
 </template>
 ```
 
