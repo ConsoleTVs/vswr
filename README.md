@@ -1,4 +1,5 @@
-![Vue SWR - Stale-While-Revalidate (SWR) strategy to fetch data in Vue 3](https://raw.githubusercontent.com/ConsoleTVs/vswr/master/vswr.svg)
+![Vue SWR - Stale-While-Revalidate (SWR) strategy to fetch data in Vue 3](https://raw.githubusercontent.com/ConsoleTVs/vswr/master/vswr-white.png#gh-dark-mode-only)
+![Vue SWR - Stale-While-Revalidate (SWR) strategy to fetch data in Vue 3](https://raw.githubusercontent.com/ConsoleTVs/vswr/master/vswr-dark.png#gh-light-mode-only)
 
 ## Table of Contents
 
@@ -16,7 +17,7 @@
 - [Get values from the cache](#get-values-from-the-cache)
 - [Error handling](#error-handling)
 - [Clear Cache](#clear-cache)
-- [FAQ](#faq)
+- [More Examples](#more-examples)
 
 ## Introduction
 
@@ -33,50 +34,57 @@ Quote from [vercel's SWR](https://swr.vercel.app/) for react:
 
 - :tada: &nbsp; Built for **Vue 3**
 - :fire: &nbsp; **Extremly small and well packed** at 2.7kB (with polyfills!).
-- :fire: &nbsp; **No dependencies**.
-- :+1: &nbsp; Built-in **cache** and request deduplication.
-- :eyes: &nbsp; **Dependent fetching** of data that depends on other.
-- :eyes: &nbsp; **Real time** experience.
-- :star: &nbsp; **Typescript** friendly.
-- :+1: &nbsp; **Error handling** by using the error variable provided.
-- :zap: &nbsp; **Efficient DOM** updates using Vue 3's reactivity.
-- :zap: &nbsp; **Efficient HTTP** requests are only done when needed.
-- :+1: &nbsp; **Manual revalidation** of the data by using `revalidate()`.
-- :+1: &nbsp; **Optimistic UI / Manual mutation** of the data by using `mutate()`.
-- :zzz: &nbsp; **Window focus revalidation** of the data.
-- :zzz: &nbsp; **Network change revalidation** of the data.
-- :+1: &nbsp; **Initial data** support for initial or offline data.
-- :+1: &nbsp; **Clear cache** when you need to invalidate all data or the specified keys (eg. a user logout).
-- :zzz: &nbsp; **Offline support** to be used without any revalidations with string keys.
-- :+1: &nbsp; **Global configuration** available or per hook call.
+- Built-in **cache** and **request deduplication**.
+- **Dependent fetching** of data that depends on other fetched data.
+- **Typescript** friendly.
+- **Error handling** by using the error variable provided.
+- :fire: &nbsp; **Efficient HTTP** requests are only done when needed.
+- **Manual revalidation** of the data by using `revalidate()`.
+- **Optimistic UI / Manual mutation** of the data by using `mutate()`.
+- **Window focus revalidation** of the data.
+- **Network change revalidation** of the data.
+- :fire: &nbsp; **SSR / Initial data** support for initial, offline data or SSR.
+- **Cache Invalidation** when you need to invalidate all data or the specified keys (eg. a user logout).
+- **Offline support** to be used without any revalidations with string keys.
+- **Global configuration** available or per hook call.
+- :fire: &nbsp; _New in 2.0_: **Suspense Support** to use with vue's `<Suspense>` component.
 
-## Upgrade Guide
+## New in 2.X.X
 
-If you come from `0.X.X` please read this section.
+- `<Suspense>` support with `querySuspense`
+- `Error Boundaries`: `querySuspense` throws errors instead of using an error variable. You can use vue's `onErrorCapture` to create an error boundary.
+- Custom logic for network reconnect and app focus using the options `focusWhen` and `reconnectWhen`. Usefull for environments outwise of the web (eg. Mobile or Desktop.
 
-- Update the way you create global configuration. There's no need to use `createSWR` and pass the result
-  to the vue app as a plugin, you can now use `createDefaultSWR` function instead and avoid registering the vue plugin.
-  See more at [Global configuration options](#global-configuration-options)
-- `revalidateOnMount` option has been renamed to `revalidateOnStart`.
-- The `clear` function does now accept a single string, and an additional options parameter.
-- The default fetcher now throws an error when the server response is not `2XX`. Meaning that there will be
-  an error propagation and the error variables will be populated when the server response is not `2XX`.
+## Upgrade Guide (1.X.X => 2.X.X)
+
+### Instance methods:
+
+- `subscribe` renamed to `subscribeData`
+- `use` renamed to `subscribe`
+- `getOrWait` renamed to `getWait`
+- `useSWR` renamed to `query`
+- `query` return property `stop` renamed to `unsubscribe`
 
 ## Installation
-
-You can use npm or yarn to install it.
 
 ```
 npm i vswr
 ```
 
-```
-yarn add vswr
-```
-
 ## Getting Started
 
+### Without Suspense
+
 ```vue
+<script setup>
+import { query } from 'vswr'
+
+// Call the `query` and pass the key you want to use. It will be pased
+// to the fetcher function. The fetcher function can be configured globally
+// or passed as one of the options to this function.
+const { data: posts } = query('https://jsonplaceholder.typicode.com/posts')
+</script>
+
 <template>
   <div v-if="posts">
     <div v-for="post of posts" :key="post.id">
@@ -84,22 +92,25 @@ yarn add vswr
     </div>
   </div>
 </template>
+```
 
-<script>
-import { useSWR } from 'vswr'
+### With Suspense
 
-export default {
-  setup() {
-    // Call the `useSWR` and pass the key you want to use. It will be pased
-    // to the fetcher function. The fetcher function can be configured globally
-    // or passed as one of the options to this function.
-    const { data: posts } = useSWR('https://jsonplaceholder.typicode.com/posts')
+```vue
+<script setup>
+import { querySuspense } from 'vswr'
 
-    // Pass the data to the component.
-    return { posts }
-  },
-}
+// Call the `querySuspense` and pass the key you want to use. It will be pased
+// to the fetcher function. The fetcher function can be configured globally
+// or passed as one of the options to this function.
+const { data: posts } = await querySuspense('https://jsonplaceholder.typicode.com/posts')
 </script>
+
+<template>
+  <div v-for="post of posts" :key="post.id">
+    {{ post.title }}
+  </div>
+</template>
 ```
 
 This is a simple example that will use SWR as the strategy to fetch the data. In this particular case,
@@ -114,15 +125,16 @@ configure global options to avoid passing them to each hook call.
 ### Signature
 
 ```js
-function useSWR(key, options): SWRResponse
+function query(key, options): SWRResponse
 // Can be destructured to get the response as such:
-const { data, error, mutate, revalidate, clear, stop, isLoading, isValid, loading } = useSWR(key, options)
+const { data, error, mutate, revalidate, clear, unsubscribe, isLoading, isValid, loading } = query(key, options)
 ```
 
 #### Parameters
 
 - `key`: A resolved or non-resolved key. Can either be a string, or a function. A function can be used for dependent fetching as seen below.
 - `options`: An optional object with optional properties such as:
+
   - `fetcher: (key) => Promise<any> = (url) => fetch(url).then((res) => res.json())`: Determines the fetcher function to use.
     This will be called to get the data.
   - `initialData: D = undefined`: Represents the initial data to use instead of undefined. Keep in mind the component will still attempt to re-validate unless `revalidateOnMount` is set false.
@@ -133,19 +145,28 @@ const { data, error, mutate, revalidate, clear, stop, isLoading, isValid, loadin
   - `revalidateOnFocus: boolean = true`: Revalidates the data when the window re-gains focus.
   - `focusThrottleInterval: number = 5000`: Interval throttle for the focus event. This will ignore focus re-validation if it
     happened last time `focusThrottleInterval` ago.
-  - `revalidateOnReconnect: boolean = true`: Revalidates the data when a network connect change is detected (basically the browser / app comes back online).
+  - `focusWhen: (notify: () => void, options: VisibilityOptions) => void | (() => void)`: You can use this function to manually call the notify callback when the application has gained focus. You can also return a function that will be called as a cleanup.
+  - `reconnectWhen: (notify: () => void, options: NetworkOptions) => void | (() => void)`: You can use this function to manually call the notify callback when the application has reconnected. You can also return a function that will be called as a cleanup.
 
-#### Return Values
+#### Return Values (Without suspense)
 
 - `data: Ref<D | undefined>`: Stores the data of the HTTP response after the fetcher has proceesed it or undefined in case the HTTP request hasn't finished or there was an error.
 - `error: Ref<E | undefined>`: Determines error of the HTTP response in case it happened or undefined if there was no error or the HTTP request is not completed yet.
 - `mutate: (value, options) => void`: Mutate alias for the global mutate function without the need to append the key to it.
 - `revalidate: (options) => void`: Revalidation alias for the global revalidate function without the need to append the key to it.
 - `clear: (options) => void`: Clears the current key data from the cache.
-- `stop: () => void`: Stops the execution of the watcher. This means the data will unsubscribe from the cache and error changes as well as all the event listeners.
+- `unsubscribe: () => void`: Stops the execution of the watcher. This means the data will unsubscribe from the cache and error changes as well as all the event listeners.
 - `isLoading: ComputedRef<boolean>`: Determines if the request is still on its way and therefore, it's still loading.
 - `isValid: ComputedRef<boolean>`: Determines if the data is valid. This means that there is no error associated with the data. This exists because errors do not wipe the data value and can still be used.
 - `loading: () => Promise<D>`: It's a function that returns a promise that resolves to the data if the request is successful, and rejects the promise if an error is thrown. Keep in mind only the first case of those two cases will be registered, no further changes will be watched.
+
+#### Return Values (With suspense)
+
+- `data: Ref<D | undefined>`: Stores the data of the HTTP response after the fetcher has proceesed it or undefined in case the HTTP request hasn't finished or there was an error.
+- `mutate: (value, options) => void`: Mutate alias for the global mutate function without the need to append the key to it.
+- `revalidate: (options) => void`: Revalidation alias for the global revalidate function without the need to append the key to it.
+- `clear: (options) => void`: Clears the current key data from the cache.
+- `unsubscribe: () => void`: Stops the execution of the watcher. This means the data will unsubscribe from the cache and error changes as well as all the event listeners.
 
 ## Global configuration options
 
@@ -165,13 +186,13 @@ function createDefaultSWR(options): VSWR
 
 #### Parameters
 
-- `options: SWROptions`: Parameters of the options that will be passed to all components. They are the same as the ones on each `useSWR` function call.
+- `options: SWROptions`: Parameters of the options that will be passed to all components. They are the same as the ones on each `query` function call.
 
 #### Return value
 
 A SWR instance that can be used to access all the API.
 
-### Example
+### Example (with axios)
 
 ```js
 import { createApp } from 'vue'
@@ -193,28 +214,42 @@ createApp(App).mount('#app')
 
 ## Dependent fetching
 
+### Without suspense
+
 ```vue
+<script setup>
+import { query } from 'vswr'
+
+const { data: post } = query('https://jsonplaceholder.typicode.com/posts/1')
+// We need to pass a function as the key. Function will re-evaluate when data changes and capture errors if needed.
+const { data: user } = query(() => `https://jsonplaceholder.typicode.com/users/${post.value.userId}`)
+</script>
+
 <template>
   <div>
     <div v-if="post">{{ post.title }}</div>
     <div v-if="user">{{ user.name }}</div>
   </div>
 </template>
+```
 
-<script>
-import { useSWR } from 'vswr'
+### With suspense
 
-export default {
-  setup() {
-    const { data: post } = useSWR('https://jsonplaceholder.typicode.com/posts/1')
-    // We need to pass a function as the key. Function will throw an error when post is undefined
-    // but we catch that and wait till it re-validates into a valid key to populate the user variable.
-    const { data: user } = useSWR(() => `https://jsonplaceholder.typicode.com/users/${post.value.userId}`)
+```vue
+<script setup>
+import { querySuspense } from './vswr'
 
-    return { post, user }
-  },
-}
+const { data: post } = await querySuspense(() => 'https://jsonplaceholder.typicode.com/posts/1')
+// We need to pass a function as the key. Function will re-evaluate when data changes and capture errors if needed.
+const { data: user } = await querySuspense(() => `https://jsonplaceholder.typicode.com/users/${post.value.userId}`)
 </script>
+
+<template>
+  <div>
+    <div>{{ post.title }}</div>
+    <div>{{ user.name }}</div>
+  </div>
+</template>
 ```
 
 ## Re-validate on demand
@@ -246,7 +281,7 @@ function revalidate(key, options): void
 
 ### On specific hooks with keys
 
-You can re-validate specific keys by grabing the `revalidate` function of the `useSWR` call.
+You can re-validate specific keys by grabing the `revalidate` function of the `query` call.
 This function will allow you to perform a re-validation of the data on demand. There's no need
 to provide the key for this function since it's already bound to the hook key. It only accepts the options.
 
@@ -260,27 +295,36 @@ function revalidate(options): void
 
 - `options`: Same as global revalidate (check above).
 
-#### Example
+#### Example (Without suspense)
 
 ```vue
+<script>
+import { query } from 'vswr'
+
+const { data: post, revalidate } = query('https://jsonplaceholder.typicode.com/posts/1')
+</script>
+
 <template>
   <div v-if="post">
     <div>{{ post.title }}</div>
     <button @click="() => revalidate()">Revalidate</button>
   </div>
 </template>
+```
 
+#### Example (With suspense)
+
+```vue
 <script>
-import { useSWR } from 'vswr'
+import { querySuspense } from 'vswr'
 
-export default {
-  setup() {
-    const { data: post, revalidate } = useSWR('https://jsonplaceholder.typicode.com/posts/1')
-
-    return { post, revalidate }
-  },
-}
+const { data: post, revalidate } = querySuspense('https://jsonplaceholder.typicode.com/posts/1')
 </script>
+
+<template>
+  <div>{{ post.title }}</div>
+  <button @click="() => revalidate()">Revalidate</button>
+</template>
 ```
 
 ## Mutate on demand
@@ -312,7 +356,7 @@ function mutate(key, value, options): void
 
 ### On specific hooks with keys
 
-You can mutate specific keys by grabing the `mutate` function of the `useSWR` call.
+You can mutate specific keys by grabing the `mutate` function of the `query` or `querySuspense` calls.
 This function will allow you to perform a mutation of the data on demand. There's no need
 to provide the key for this function since it's already bound to the hook key. It only accepts the value and the options.
 
@@ -327,12 +371,18 @@ function mutate(value, options): void
 - `value`: Same as global mutate (check above).
 - `options`: Same as global mutate (check above).
 
-#### Example
+#### Example (Without Suspense)
 
 Keep in mind we set revalidate to false to avoid it performing a HTTP request for this example, since this would just
 over-write the static data with the server data again.
 
 ```vue
+<script setup>
+import { query } from 'vswr'
+
+const { data: post, mutate } = query('https://jsonplaceholder.typicode.com/posts/1')
+</script>
+
 <template>
   <div v-if="post">
     <div>{{ post.title }}</div>
@@ -342,32 +392,41 @@ over-write the static data with the server data again.
     <button @click="() => mutate({ title: 'Sample' }, { revalidate: false })">Leave only title</button>
   </div>
 </template>
+```
 
-<script>
-import { useSWR } from 'vswr'
+#### Example (With Suspense)
 
-export default {
-  setup() {
-    const { data: post, mutate } = useSWR('https://jsonplaceholder.typicode.com/posts/1')
+Keep in mind we set revalidate to false to avoid it performing a HTTP request for this example, since this would just
+over-write the static data with the server data again.
 
-    return { post, mutate }
-  },
-}
+```vue
+<script setup>
+import { querySuspense } from 'vswr'
+
+const { data: post, mutate } = querySuspense('https://jsonplaceholder.typicode.com/posts/1')
 </script>
+
+<template>
+  <div>{{ post.title }}</div>
+  <button @click="() => mutate((state) => ({ ...state, title: 'Sample' }), { revalidate: false })">
+    Mutate only title
+  </button>
+  <button @click="() => mutate({ title: 'Sample' }, { revalidate: false })">Leave only title</button>
+</template>
 ```
 
 ## Manual subscription
 
-You can manually subscribe to data or error changes by using the `subscribe` and `subscribeErrors` functions.
+You can manually subscribe to data or error changes by using the `subscribeData` and `subscribeErrors` functions.
 
 ### Example
 
 ```js
-import { subscribe, subscribeErrors } from 'vswr'
+import { subscribeData, subscribeErrors } from 'vswr'
 
 const key = 'example/key'
 
-subscribe(key, (data) => {
+subscribeData(key, (data) => {
   console.log(`${key} changed to ${data}`)
 })
 
@@ -380,12 +439,12 @@ subscribeErrors(key, (error) => {
 
 You can also manually get values from the cache without the need to subscribe for changes or
 use the built-in hook (that does more things under the hood like subscribing as well). You can use
-the `get` and `getOrWait` functions to get the current values from the cache.
+the `get` and `getWait` functions to get the current values from the cache.
 
 ## Example
 
 ```js
-import { get, getOrWait } from 'vswr'
+import { get, getWait } from 'vswr'
 
 const key = 'example/key'
 
@@ -398,19 +457,27 @@ const currentValue = get(key)
 // Gets an element from the cache. The difference with the get is that
 // this method returns a promise that will resolve the the value.
 // If there's no item in the cache, it will wait for it before resolving.
-const awaitCurrentValue = await getOrWait(key)
-
-// Note: This example uses top-level await just to ilustrate this use-case.
+// It does not attempt to revalidate or fetch the data, thus a possible
+// endless promise is possible. Make sure the data is fetched or revalidated first.
+const awaitCurrentValue = await getWait(key)
 ```
 
 ## Error handling
 
+### Without Suspense
+
 You can handle request errors by using the `error` return value on a hook call. This will return the specific error that happened to the hook.
 For example, a failed request.
 
-### Example
+#### Example
 
 ```vue
+<script setup>
+import { query } from 'vswr'
+
+const { data: posts, error } = query('https://jsonplaceholder.typicode.com/posts')
+</script>
+
 <template>
   <div>
     <div v-if="error">There was an error</div>
@@ -421,18 +488,74 @@ For example, a failed request.
     </div>
   </div>
 </template>
+```
 
-<script>
-import { useSWR } from 'vswr'
+### With Suspense
 
-export default {
-  setup() {
-    const { data: posts, error } = useSWR('https://jsonplaceholder.typicode.com/posts')
+In suspense, if a query errors out, there will be no `error` variable available.
+Instead, errors are expected to be handled by what's known as an `error boundary`.
+An error boundary will capture errors during the initial component load and subsequent updates.
 
-    return { posts, error }
-  },
-}
+An error boundary may look like this, althought that component must be created manually and serves as ilustration.
+
+```vue
+<script setup>
+import { onErrorCaptured, ref, Ref, unref } from 'vue'
+
+const error = ref(undefined)
+const retry = () => (error.value = undefined)
+
+onErrorCaptured((err) => {
+  // We must unref since it can be either a thrown Error or
+  // a Ref<E>, where E is Error by default but depends on the query's fetch.
+  error.value = unref(err)
+  return false
+})
 </script>
+
+<template>
+  <slot name="error" v-if="error" :error="error" :retry="retry" />
+  <slot v-else />
+</template>
+```
+
+#### Example
+
+`<ErrorBoundary>` referts to the ilustrated error boundary component above, althought it might be different.
+
+Your application should wrap your suspensable component in both, an error boundary and a `Suspense` component. An example below:
+
+```vue
+<template>
+  <ErrorBoundary>
+    <template #error="{ error, retry }">
+      <div>{{ error.message }}</div>
+      <button @click="retry">Retry</button>
+    </template>
+    <Suspense>
+      <template #fallback>
+        <div>Loading...</div>
+      </template>
+      <ExamplePosts />
+    </Suspense>
+  </ErrorBoundary>
+</template>
+```
+
+Then your components can use suspense like this (`ExamplePosts`):
+
+```vue
+<script setup>
+import { querySuspense } from 'vswr'
+
+const { data: posts } = await querySuspense('https://jsonplaceholder.typicode.com/posts')
+</script>
+
+<template>
+  <div v-for="post of posts" :key="post.id">
+    {{ post.title }}
+  </div>
+</template>
 ```
 
 ## Clear Cache
@@ -453,25 +576,10 @@ function clear(keys, options): void
 
 #### Parameters
 
-- `keys`: A list with the keys to delete or a single string key. If keys is undefined, all keys will be cleared from the cache.
+- `keys`: A list with the keys to delete or a single string key. If keys is undefined, all keys will be cleared from the cache. Null will set the value to null.
 - `options`: A list of optional options.
   - `broadcast: boolean = false`: Determines if the cache should broadcast the cache change to subscribed handlers. That means telling them the value now resolves to undefined.
 
-## FAQ
+## More Examples
 
-### Differences with `swr`
-
-SWR was my first impressions on this kind of aproach towards data fetching. I've come to realize it
-is a strategy that I enjoy and fits well into modern front-end frameworks like React or Vue. However
-SWR is only compatible with react and I often use Vue for work related tasks. This lead me to consider
-a Vue alternative that I could use to achieve the same results.
-
-### Differences with `swrv`
-
-I built this library when `swrv` was already established. However, at that time, it was mostly
-used with vue 2 and had a small feature set and some important issues that I needed to avoid for
-a work project I was working on. This lead me into tinkering with Vue's 3 reactivity system to
-implement SWR from the ground up without looking at any code from `swr` or `swrv`. Those two projects
-are both great and lead a strong foundation to what I was able to achieve. In fact, I used both project
-documentations to decide the initial feature set I wanted to have. Nevertheless, due the lack of a few
-features I needed (like network change revalidation or request deduping) it made me start building this lib.
+Check out the `src` folder of this project. You'll find an `example.ts` file with a sample vue application and a few components serving as examples.

@@ -1,30 +1,43 @@
 {
   "name": "vswr",
-  "version": "1.4.1",
+  "version": "2.0.0",
   "description": "Stale-While-Revalidate (SWR) strategy to fetch data in Vue 3",
-  "author": "Èrik C. Forés <soc@erik.cat>",
+  "author": {
+    "name": "Èrik C. Forés",
+    "email": "soc@erik.cat",
+    "url": "https://erik.cat"
+  },
   "repository": "https://github.com/ConsoleTVs/vswr",
   "license": "MIT",
-  "main": "dist/index.js",
-  "module": "dist/esm/index.js",
-  "unpkg": "dist/iife/index.js",
-  "typings": "dist/index.d.ts",
+  "types": "./dist/vswr.d.ts",
+  "main": "./dist/vswr.umd.js",
+  "module": "./dist/vswr.es.js",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": "./dist/vswr.es.js",
+      "require": "./dist/vswr.umd.js"
+    }
+  },
   "files": [
-    "dist"
+    "dist",
+    "package.json"
   ],
   "scripts": {
-    "dev": "tsup src/index.ts --watch --format esm,cjs,iife --legacy-output",
-    "build": "tsup src/index.ts --dts --format esm,cjs,iife --legacy-output --minify",
+    "dev": "vite",
+    "build": "vite build && tsc --skipLibCheck",
     "prepack": "npm run build"
   },
   "peerDependencies": {
-    "vue": "^3.0.4"
+    "vue": "^3.2.0"
   },
   "devDependencies": {
-    "tsup": "^4.11.2",
-    "typescript": "^4.3.4"
+    "@babel/types": "^7.17.0",
+    "@vitejs/plugin-vue": "^2.2.4",
+    "typescript": "^4.6.2",
+    "vite": "^2.8.5"
   },
   "dependencies": {
-    "swrev": "^1.9.0"
+    "swrev": "^2.0.0"
   }
 }

@@ -1,31 +1,79 @@
-import { SWR, SWRKey, SWROptions, SWRMutateOptions, SWRRevalidateOptions, CacheClearOptions } from 'swrev'
-import { Ref, ref, getCurrentInstance, onUnmounted, watch, watchEffect, computed } from 'vue'
+import {
+  SWR,
+  SWRKey,
+  SWRMutateValue,
+  SWROptions,
+  SWRMutateOptions,
+  SWRRevalidateOptions,
+  CacheClearOptions,
+} from 'swrev'
+import {
+  Ref,
+  ref,
+  getCurrentInstance,
+  onUnmounted,
+  watch,
+  watchEffect,
+  computed,
+  ComputedRef,
+  WatchStopHandle,
+} from 'vue'
+
+export interface SWRResponse<D = any, E = Error> {
+  data: Ref<D | undefined>
+  error: Ref<E | undefined>
+  mutate: (value: D, ops?: Partial<SWRMutateOptions<D>> | undefined) => void
+  revalidate: (ops?: Partial<SWRRevalidateOptions<D>> | undefined) => void
+  clear: (ops?: Partial<CacheClearOptions> | undefined) => void
+  unsubscribe: WatchStopHandle
+  isLoading: ComputedRef<boolean>
+  isValid: ComputedRef<boolean>
+  loading: () => Promise<Ref<D>>
+}
+
+export interface SWRSuspenseResponse<D = any> {
+  data: Ref<D>
+  mutate: (value: D, ops?: Partial<SWRMutateOptions<D>> | undefined) => void
+  revalidate: (ops?: Partial<SWRRevalidateOptions<D>> | undefined) => void
+  clear: (ops?: Partial<CacheClearOptions> | undefined) => void
+  unsubscribe: WatchStopHandle
+}
+
+export type SuspenseSWRBuilder = <D = any>(
+  key: SWRKey,
+  options?: Partial<SWROptions<D>>
+) => Promise<SWRSuspenseResponse<D>>
 
 export class VSWR extends SWR {
   /**
    * Use the SWR with a vue application.
+   * Queries the data.
    */
-  useSWR<D = any, E = Error>(key?: SWRKey | (() => SWRKey | undefined), options?: Partial<SWROptions<D>>) {
+  public query<D = any, E = Error>(
+    key?: SWRKey | (() => SWRKey | undefined),
+    options?: Partial<SWROptions<D>>
+  ): SWRResponse<D, E> {
     // Contains the data and errors references.
     const data = ref<D | undefined>()
     const error = ref<E | undefined>()
 
-    // Handlers that will be executed when data changes.
-    const onData = (d: D) => {
-      // Set the last error to undefined
-      // since we just got a correct data.
-      error.value = undefined
-      // Set the data's value to the new value.
-      data.value = d
-    }
-    const onError = (e: E) => (error.value = e)
-
     // Subscribe and use the SWR fetch using the given key.
-    const stop = watch(
+    const unsubscribe = watch(
       () => this.resolveKey(key),
       (_values, _oldValues, onInvalidate) => {
+        // Handlers that will be executed when data changes.
+        const onData = (d: D) => {
+          // Set the last error to undefined
+          // since we just got a correct data.
+          error.value = undefined
+          // Set the data's value to the new value.
+          data.value = d
+        }
+        const onError = (e: E) => {
+          error.value = e
+        }
         // Subscribe to the new key.
-        const { unsubscribe } = this.use<D, E>(key, onData, onError, {
+        const { unsubscribe } = this.subscribe<D, E>(key, onData, onError, {
           loadInitialCache: true,
           ...options,
         })
@@ -76,18 +124,38 @@ export class VSWR extends SWR {
     // cases will be registered, no further changes
     // will be watched.
     const loading = () => {
+      let unsubscribe: WatchStopHandle | undefined = undefined
       return new Promise<Ref<D>>((resolve, reject) => {
-        const stopLoading = watchEffect(() => {
+        unsubscribe = watchEffect(() => {
           if (isLoading.value) return
           else if (error.value !== undefined) reject(error)
           else resolve(data as Ref<D>)
-          stopLoading()
         })
-      })
+      }).finally(() => unsubscribe?.())
     }
 
     // Return the data.
-    return { data, error, mutate, revalidate, clear, stop, isLoading, isValid, loading }
+    return { data, error, mutate, revalidate, clear, unsubscribe, isLoading, isValid, loading }
+  }
+
+  /**
+   * Query with suspense support.
+   */
+  public async querySuspense<D = any>(
+    key?: SWRKey | (() => SWRKey | undefined),
+    options?: Partial<SWROptions<D>>
+  ): Promise<SWRSuspenseResponse<D>> {
+    const { loading, error, mutate, revalidate, clear, unsubscribe } = this.query<D>(key, options)
+
+    // Sice we're using suspense, we can throw
+    // when there's an error. You can catch errors
+    // using `onCaptureError` hook.
+    watch(error, (e) => {
+      unsubscribe()
+      if (e) throw e
+    })
+
+    return { data: await loading(), mutate, revalidate, clear, unsubscribe }
   }
 }
 
@@ -117,8 +185,8 @@ export const createDefaultSWR = <D = any>(options?: Partial<SWROptions<D>>) => {
  * this data will be stale and revalidate in the background
  * unless specified otherwise.
  */
-export const subscribe = <D>(key: SWRKey | undefined, onData: (value: D) => any) => {
-  return swr.subscribe<D>(key, onData)
+export const subscribeData = <D>(key: SWRKey | undefined, onData: (value: D) => any) => {
+  return swr.subscribeData<D>(key, onData)
 }
 
 /**
@@ -147,28 +215,38 @@ export const get = <D = any>(key?: SWRKey): D | undefined => {
  * that will resolve the the value. If there's no item
  * in the cache, it will wait for it before resolving.
  */
-export const getOrWait = <D = any>(key: SWRKey): Promise<D> => {
-  return swr.getOrWait<D>(key)
+export const getWait = <D = any>(key: SWRKey): Promise<D> => {
+  return swr.getWait<D>(key)
 }
 
 /**
  * Use a SWR value given the key and
  * subscribe to future changes.
  */
-export const use = <D = any, E = Error>(
+export const subscribe = <D = any, E = Error>(
   key: SWRKey | undefined | (() => SWRKey | undefined),
   onData: (value: D) => void,
   onError: (error: E) => void,
   options?: Partial<SWROptions<D>>
 ) => {
-  return swr.use<D, E>(key, onData, onError, options)
+  return swr.subscribe<D, E>(key, onData, onError, options)
 }
 
 /**
  * Use the SWR with a vue application.
  */
-export const useSWR = <D = any, E = Error>(key?: SWRKey | (() => SWRKey), options?: Partial<SWROptions<D>>) => {
-  return swr.useSWR<D, E>(key, options)
+export const query = <D = any, E = Error>(
+  key?: SWRKey | (() => SWRKey | undefined),
+  options?: Partial<SWROptions<D>>
+) => {
+  return swr.query<D, E>(key, options)
+}
+
+/**
+ * Query with suspense support.
+ */
+export const querySuspense = <D = any>(key?: SWRKey | (() => SWRKey | undefined), options?: Partial<SWROptions<D>>) => {
+  return swr.querySuspense<D>(key, options)
 }
 
 /**
@@ -176,7 +254,7 @@ export const useSWR = <D = any, E = Error>(key?: SWRKey | (() => SWRKey), option
  * This is used to replace the cache contents of the
  * given key manually.
  */
-export const mutate = <D = any>(key?: SWRKey, value?: D, options?: Partial<SWRMutateOptions<D>>) => {
+export const mutate = <D = any>(key?: SWRKey, value?: SWRMutateValue<D>, options?: Partial<SWRMutateOptions>) => {
   return swr.mutate<D>(key, value, options)
 }
 
@@ -191,6 +269,6 @@ export const revalidate = <D>(key?: SWRKey, options?: Partial<SWRRevalidateOptio
  * Clear the specified keys from the cache. If no keys
  * are specified, it clears all the cache keys.
  */
-export const clear = (keys?: string | string[], options?: Partial<CacheClearOptions>) => {
+export const clear = (keys?: SWRKey | SWRKey[] | null, options?: Partial<CacheClearOptions>) => {
   return swr.clear(keys, options)
 }
