@@ -319,7 +319,7 @@ const { data: post, revalidate } = query('https://jsonplaceholder.typicode.com/p
 <script>
 import { querySuspense } from 'vswr'
 
-const { data: post, revalidate } = querySuspense('https://jsonplaceholder.typicode.com/posts/1')
+const { data: post, revalidate } = await querySuspense('https://jsonplaceholder.typicode.com/posts/1')
 </script>
 
 <template>
@@ -404,7 +404,7 @@ over-write the static data with the server data again.
 <script setup>
 import { querySuspense } from 'vswr'
 
-const { data: post, mutate } = querySuspense('https://jsonplaceholder.typicode.com/posts/1')
+const { data: post, mutate } = await querySuspense('https://jsonplaceholder.typicode.com/posts/1')
 </script>
 
 <template>
