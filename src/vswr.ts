@@ -86,7 +86,7 @@ export class VSWR extends SWR {
     // Check if there's an active component
     // to automatically clean up when the component
     // goes out of scope.
-    if (getCurrentInstance()) onUnmounted(() => stop())
+    if (getCurrentInstance()) onUnmounted(() => unsubscribe())
 
     // Mutates the current key.
     const mutate = (value: D, ops?: Partial<SWRMutateOptions<D>>) => {

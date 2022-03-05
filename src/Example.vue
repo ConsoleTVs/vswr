@@ -3,9 +3,7 @@ import { query } from './vswr'
 
 const fetcher = () =>
   new Promise((r) => setTimeout(r, 1000)).then(() => [
-    // @ts-ignore
     { id: 1, title: 'Example: ' + crypto.randomUUID() },
-    // @ts-ignore
     { id: 2, title: 'Example: ' + crypto.randomUUID() },
   ])
 

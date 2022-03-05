@@ -240,7 +240,7 @@ const { data: user } = query(() => `https://jsonplaceholder.typicode.com/users/$
 <script setup>
 import { querySuspense } from 'vswr'
 
-const { data: post } = await querySuspense(() => 'https://jsonplaceholder.typicode.com/posts/1')
+const { data: post } = await querySuspense('https://jsonplaceholder.typicode.com/posts/1')
 // We need to pass a function as the key. Function will re-evaluate when data changes and capture errors if needed.
 const { data: user } = await querySuspense(() => `https://jsonplaceholder.typicode.com/users/${post.value.userId}`)
 </script>
