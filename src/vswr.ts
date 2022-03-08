@@ -7,17 +7,7 @@ import {
   SWRRevalidateOptions,
   CacheClearOptions,
 } from 'swrev'
-import {
-  Ref,
-  ref,
-  getCurrentInstance,
-  onUnmounted,
-  watch,
-  watchEffect,
-  computed,
-  ComputedRef,
-  WatchStopHandle,
-} from 'vue'
+import { Ref, ref, getCurrentInstance, onUnmounted, watch, computed, ComputedRef, WatchStopHandle } from 'vue'
 
 export interface SWRResponse<D = any, E = Error> {
   data: Ref<D | undefined>
@@ -28,7 +18,7 @@ export interface SWRResponse<D = any, E = Error> {
   unsubscribe: WatchStopHandle
   isLoading: ComputedRef<boolean>
   isValid: ComputedRef<boolean>
-  loading: () => Promise<Ref<D>>
+  promise: Promise<Ref<D>>
 }
 
 export interface SWRSuspenseResponse<D = any> {
@@ -57,6 +47,13 @@ export class VSWR extends SWR {
     const data = ref<D | undefined>()
     const error = ref<E | undefined>()
 
+    let promiseResolve: (value: Ref<D>) => void
+    let promiseReject: (reason?: any) => void
+    const promise = new Promise<Ref<D>>((resolve, reject) => {
+      promiseResolve = resolve
+      promiseReject = reject
+    })
+
     // Subscribe and use the SWR fetch using the given key.
     const unsubscribe = watch(
       () => this.resolveKey(key),
@@ -68,10 +65,14 @@ export class VSWR extends SWR {
           error.value = undefined
           // Set the data's value to the new value.
           data.value = d
+          promiseResolve(data as Ref<D>)
         }
+
         const onError = (e: E) => {
           error.value = e
+          promiseReject(error)
         }
+
         // Subscribe to the new key.
         const { unsubscribe } = this.subscribe<D, E>(key, onData, onError, {
           loadInitialCache: true,
@@ -116,26 +117,8 @@ export class VSWR extends SWR {
     // and can still be used.
     const isValid = computed(() => data.value !== undefined && error.value === undefined)
 
-    // Loading function for the current key.
-    // It's a function that returns a promise that
-    // resolves to the data if the request is successful,
-    // and rejects the promise if an error is thrown.
-    // Keep in mind only the first case of those two
-    // cases will be registered, no further changes
-    // will be watched.
-    const loading = () => {
-      let unsubscribe: WatchStopHandle | undefined = undefined
-      return new Promise<Ref<D>>((resolve, reject) => {
-        unsubscribe = watchEffect(() => {
-          if (isLoading.value) return
-          else if (error.value !== undefined) reject(error)
-          else resolve(data as Ref<D>)
-        })
-      }).finally(() => unsubscribe?.())
-    }
-
     // Return the data.
-    return { data, error, mutate, revalidate, clear, unsubscribe, isLoading, isValid, loading }
+    return { data, error, mutate, revalidate, clear, unsubscribe, isLoading, isValid, promise }
   }
 
   /**
@@ -145,7 +128,7 @@ export class VSWR extends SWR {
     key?: SWRKey | (() => SWRKey | undefined),
     options?: Partial<SWROptions<D>>
   ): Promise<SWRSuspenseResponse<D>> {
-    const { loading, error, mutate, revalidate, clear, unsubscribe } = this.query<D>(key, options)
+    const { promise, data, error, mutate, revalidate, clear, unsubscribe } = this.query<D>(key, options)
 
     // Sice we're using suspense, we can throw
     // when there's an error. You can catch errors
@@ -155,7 +138,11 @@ export class VSWR extends SWR {
       if (e) throw e
     })
 
-    return { data: await loading(), mutate, revalidate, clear, unsubscribe }
+    watch(data, (d) => {
+      if (d === undefined) getCurrentInstance()?.proxy?.$forceUpdate()
+    })
+
+    return { data: await promise, mutate, revalidate, clear, unsubscribe }
   }
 }
 

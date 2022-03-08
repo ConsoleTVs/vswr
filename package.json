@@ -1,6 +1,6 @@
 {
   "name": "vswr",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "Stale-While-Revalidate (SWR) strategy to fetch data in Vue 3",
   "author": {
     "name": "Èrik C. Forés",
