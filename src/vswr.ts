@@ -9,7 +9,7 @@ import {
 } from 'swrev'
 import { Ref, ref, getCurrentInstance, onUnmounted, watch, computed, ComputedRef, WatchStopHandle } from 'vue'
 
-export { SWROptions } from 'swrev'
+export * from 'swrev'
 
 export interface SWRResponse<D = any, E = Error> {
   data: Ref<D | undefined>
